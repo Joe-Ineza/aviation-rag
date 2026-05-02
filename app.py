@@ -1170,6 +1170,78 @@ with tab4:
                                 )
                                 st.error(f"Test case generation failed: {e}")
 
+# ===========================================================================
+# Tab 5 — What's Next
+# ===========================================================================
+with tab5:
+    st.header("What's Next")
+    st.markdown(
+        "The system is functional end-to-end, but several improvements would "
+        "make it production-ready. Below are the highest-priority directions, "
+        "ordered by impact."
+    )
+
+    with st.expander("Replace the LSA fallback with a real semantic embedder", expanded=True):
+        st.markdown(
+            "The current build uses an LSA fallback (HashingVectorizer + TruncatedSVD, 256d) "
+            "because the build environment had no HuggingFace network access. "
+            "Swapping in BGE-small-en-v1.5 — the intended embedder — would meaningfully "
+            "improve semantic recall. It requires dropping `embedder.pkl` and `embeddings.npy`, "
+            "ensuring HuggingFace access, and rerunning `scripts/build_index.py`. "
+            "The rest of the pipeline is unchanged."
+        )
+
+    with st.expander("Expand the evaluation gold set"):
+        st.markdown(
+            "The current gold set is a small seed (~handful of labelled queries). "
+            "A robust retrieval benchmark needs at minimum 50–100 labelled query/relevant-case "
+            "pairs drawn from diverse failure modes, aircraft types, and flight phases. "
+            "With a larger gold set, the recall@k / MRR metrics in `src/eval/` become "
+            "meaningful enough to gate model changes automatically in CI."
+        )
+
+    with st.expander("Add a re-ranking step"):
+        st.markdown(
+            "RRF fusion is a strong baseline but a cross-encoder re-ranker "
+            "(e.g. BGE-reranker-base) applied to the top-20 candidates would improve "
+            "precision before the final top-8 are passed to the generator. "
+            "This is the single highest-ROI retrieval upgrade after fixing the embedder."
+        )
+
+    with st.expander("Structured metadata filtering"):
+        st.markdown(
+            "Queries like 'fuel system failures in single-engine aircraft during personal "
+            "flight in VMC' contain hard filters (aircraft class, flight purpose, weather) "
+            "that the current hybrid retriever treats as soft signals. "
+            "Pre-filtering the FAISS index by metadata before semantic search would "
+            "reduce noise and allow the agent to answer more specific queries accurately."
+        )
+
+    with st.expander("Multi-turn conversation memory"):
+        st.markdown(
+            "The current pipeline is stateless — each query is independent. "
+            "Adding a short conversation buffer (last 3–5 turns) passed to the planner "
+            "would let users ask follow-up questions like 'show me cases from Texas only' "
+            "without repeating context. This is a one-session memory, not persistent storage."
+        )
+
+    with st.expander("Productionisation and safety hardening"):
+        st.markdown(
+            "Before any real-world deployment several things need attention: "
+            "rate limiting and per-user quotas on the gateway client, "
+            "structured logging of AgentRunTrace objects to a database for audit, "
+            "a more comprehensive prompt injection test suite beyond the Pydantic "
+            "length/control-char guards, and a human review step before any "
+            "generated content is used to inform actual maintenance decisions."
+        )
+
+    st.divider()
+    st.markdown(
+        "The architecture is deliberately layered so each of these improvements "
+        "can be dropped in independently — the schema, retriever, agent interfaces, "
+        "and evaluation harness are all decoupled."
+    )
+
 # ---------------------------------------------------------------------------
 _pad = None
 _pad = None
