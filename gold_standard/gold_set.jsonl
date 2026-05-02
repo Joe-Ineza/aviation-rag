@@ -1,0 +1,5 @@
+{"query": "fuel exhaustion incidents on takeoff", "relevant_case_ids": ["19780225001819I", "19790507025919I", "19840914055239A", "19850805040409A"], "topic": "fuel_exhaustion"}
+{"query": "tailwheel ground loop on landing", "relevant_case_ids": ["19860514036219I", "19870910061919I", "19750315005389A"], "topic": "tailwheel"}
+{"query": "engine failure caused by contaminated fuel", "relevant_case_ids": ["19790319004969A", "19791102034159A", "20040925025079A"], "topic": "fuel_contamination"}
+{"query": "Cessna maintenance inspection failures", "relevant_case_ids": ["19840821046409A"], "topic": "maintenance_inspection"}
+{"query": "wasp nest blocking fuel system", "relevant_case_ids": ["19780812020899A"], "topic": "fuel_system_blockage"}

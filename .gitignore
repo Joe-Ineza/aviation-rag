@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+venv/
+myenv/
+env/
+data/nd-crane-trusted_ke-0ac3387/tool_results/
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
