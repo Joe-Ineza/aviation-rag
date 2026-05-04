@@ -6,9 +6,20 @@ Last resort (no network): HashingVectorizer + TruncatedSVD via scikit-learn.
 """
 from __future__ import annotations
 
+import warnings
 from typing import Iterable, Protocol
 
 import numpy as np
+
+# Suppress sklearn version mismatch warning that fires when loading the pickled
+# HashingLsaBackend (built with an older sklearn release). The backend is
+# forward-compatible and the warning is safe to ignore.
+warnings.filterwarnings(
+    "ignore",
+    message="Trying to unpickle estimator",
+    category=UserWarning,
+    module="sklearn",
+)
 
 
 class Embedder(Protocol):

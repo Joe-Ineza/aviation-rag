@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 # Load .env from the project root (parent of src/)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(PROJECT_ROOT / ".env")
+load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 
 def _env(name: str, default: str | None = None, *, required: bool = False) -> str:
@@ -63,6 +63,14 @@ class Settings:
 
     # Agent loop
     max_react_steps: int = int(_env("MAX_REACT_STEPS", "4"))
+
+    # Per-role output token budgets (tune up if models truncate responses)
+    max_tokens_judge: int = int(_env("MAX_TOKENS_JUDGE", "800"))
+    max_tokens_generator: int = int(_env("MAX_TOKENS_GENERATOR", "4096"))
+
+    # LLM retry / backoff
+    llm_max_retries: int = int(_env("LLM_MAX_RETRIES", "3"))
+    llm_retry_base_delay: float = float(_env("LLM_RETRY_BASE_DELAY", "2.0"))
 
     def require_gateway(self) -> None:
         if not self.api_key or not self.base_url:

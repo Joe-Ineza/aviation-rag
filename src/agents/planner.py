@@ -5,6 +5,7 @@ validate -> (one revise retry on validator notes) -> return trace.
 """
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 from ..config import SETTINGS
@@ -21,14 +22,19 @@ from . import generator as gen_agent
 from . import scope_router
 from . import validator as val_agent
 
-# Heuristic: rerun retrieval if hybrid scores are too low to trust.
+log = logging.getLogger(__name__)
+
+# Heuristic: rerun retrieval if all hybrid scores are too low to trust.
 WEAK_EVIDENCE_FLOOR = 0.005
 
-
-REFINE_SYSTEM = """You refine search queries for an aviation incident knowledge base.
+REFINE_SYSTEM = """\
+You refine search queries for an aviation incident knowledge base.
 The original query produced weak evidence. Propose ONE alternate query that
-emphasizes concrete aviation terms (aircraft make/model, system names, phase
-of flight, weather, location). Return ONLY a JSON object: {"query": "<new query>"}.
+emphasises concrete aviation terms (aircraft make/model, system names, phase
+of flight, weather, location).
+
+OUTPUT FORMAT: raw JSON only — no markdown, no explanation, no preamble.
+{"query": "<improved query string>"}
 """
 
 
@@ -39,12 +45,18 @@ class RunResult:
 
 
 def _refine_query(original: str) -> str:
-    raw = judge().chat_json(
-        REFINE_SYSTEM,
-        f"Original query:\n{original}",
-        max_tokens=120,
-    )
-    return str(raw.get("query") or original).strip()
+    try:
+        raw = judge().chat_json(
+            REFINE_SYSTEM,
+            f"Original query:\n{original}",
+            max_tokens=SETTINGS.max_tokens_judge,
+        )
+        refined = str(raw.get("query") or original).strip()
+        log.info("Query refined: %r → %r", original, refined)
+        return refined
+    except Exception as exc:
+        log.warning("Query refinement failed (%s); keeping original", exc)
+        return original
 
 
 def _evidence_is_weak(retrieved: list[RetrievedChunk]) -> bool:
@@ -93,7 +105,6 @@ def run(
     trace.retrieved = retrieved
 
     if not retrieved:
-        # No evidence; return a refusal but stay in-domain.
         trace.answer = GeneratedAnswer(
             answer="I couldn't find evidence in the case knowledge base to answer that.",
             cited_cases=[],

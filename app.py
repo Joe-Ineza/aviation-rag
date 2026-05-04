@@ -543,8 +543,8 @@ Outputs saved to `artifacts/index/`
     )
 
     def _step(num, title, badge, badge_col, desc, note=""):
-        badge_bg = {"Pydantic": "#f0fdf4", "Claude Haiku": "#faf5ff",
-                    "FAISS + BM25": "#eff6ff", "Claude Sonnet": "#fff7ed",
+        badge_bg = {"Pydantic": "#f0fdf4", "Gemini Flash": "#faf5ff",
+                    "FAISS + BM25": "#eff6ff", "Gemini Pro": "#fff7ed",
                     }.get(badge, "#f9fafb")
         note_html = (
             f'<div style="margin-top:7px; font-size:0.78rem; color:#6b7280; '
@@ -581,8 +581,8 @@ Outputs saved to `artifacts/index/`
               "the schema layer, with no LLM involved.",
               "Output: a clean UserQuery string"),
 
-        _step("2", "Scope Router", "Claude Haiku", "#6d28d9",
-              "A single fast call to Haiku asks: is this question about aviation "
+        _step("2", "Scope Router", "Gemini Flash", "#6d28d9",
+              "A single fast call to Gemini Flash asks: is this question about aviation "
               "incidents or safety findings? If not, a fixed refusal is returned "
               "immediately and the pipeline stops. This keeps the assistant on-topic "
               "and prevents expensive downstream calls on irrelevant queries.",
@@ -594,21 +594,21 @@ Outputs saved to `artifacts/index/`
               "20 most lexically relevant chunks using token overlap. "
               "Reciprocal Rank Fusion merges the two lists by rank position, "
               "rewarding chunks that score well on both. The top 8 survive. "
-              "If all scores fall below 0.005, Haiku rewrites the query and "
+              "If all scores fall below 0.005, Gemini Flash rewrites the query and "
               "retrieval retries (up to 4 attempts total).",
               "Output: 8 ranked chunks, each tagged with case_id, field, and score"),
 
-        _step("4", "Answer Generation", "Claude Sonnet", "#c2410c",
-              "Sonnet receives the question and the 8 retrieved chunks as evidence. "
+        _step("4", "Answer Generation", "Gemini Pro", "#c2410c",
+              "Gemini Pro receives the question and the 8 retrieved chunks as evidence. "
               "Using chain-of-thought prompting, it reasons through which cases are "
               "relevant, what they say, and where they agree or conflict — then writes "
               "a concise answer. It is explicitly instructed that every factual claim "
               "must come from the evidence, not model memory.",
               "Output: {answer, cited_cases, rationale, confidence, caveats}"),
 
-        _step("5", "Answer Validation", "Claude Haiku", "#6d28d9",
-              "A second independent Haiku call reviews the answer without knowing "
-              "that Sonnet wrote it. It checks three things: are all claims supported "
+        _step("5", "Answer Validation", "Gemini Flash", "#6d28d9",
+              "A second independent Gemini Flash call reviews the answer without knowing "
+              "that Gemini Pro wrote it. It checks three things: are all claims supported "
               "by the evidence (grounding)? Do the claims agree with each other "
               "(consistency)? Are the cited case IDs real and relevant (citations)? "
               "A 'revise' verdict triggers one retry with the validator's notes. "
@@ -655,11 +655,11 @@ Outputs saved to `artifacts/index/`
                 "which makes it more robust than weighted score blending."
             )
 
-        with st.expander("Two models: Haiku for judgment, Sonnet for generation"):
+        with st.expander("Two models: Gemini Flash for judgment, Gemini Pro for generation"):
             st.markdown(
                 "The scope check, query refinement, and validation steps all need "
-                "fast structured decisions, not long-form reasoning. Haiku handles "
-                "those. Sonnet is reserved for the one step where answer quality "
+                "fast structured decisions, not long-form reasoning. Gemini Flash handles "
+                "those. Gemini Pro is reserved for the one step where answer quality "
                 "actually matters: generation. This keeps the median latency low "
                 "and concentrates cost where it has the most impact."
             )
@@ -709,7 +709,7 @@ Outputs saved to `artifacts/index/`
         st.markdown("- FAISS IndexFlatIP\n- BM25Okapi\n- fastembed / BGE-small-en")
     with ts3:
         st.markdown("**LLM Layer**")
-        st.markdown("- Claude Sonnet (generator)\n- Claude Haiku (judge)\n- OpenAI SDK + CMU Gateway")
+        st.markdown("- Gemini Pro (generator)\n- Gemini Flash (judge)\n- OpenAI-compatible SDK + Google AI Studio")
     with ts4:
         st.markdown("**Infrastructure**")
         st.markdown("- Python 3.10+\n- Streamlit\n- dotenv + dataclass config")
@@ -729,6 +729,7 @@ with tab4:
         "Nothing in the answer comes from model memory."
     )
     st.markdown("---")
+
 
     # ------------------------------------------------------------------
     # System status diagnostic — surfaces exactly what is and isn't ready
