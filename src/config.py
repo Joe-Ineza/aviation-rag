@@ -1,4 +1,10 @@
-"""Central configuration loaded from environment / .env.
+"""Central configuration loaded from environment / .env / Streamlit secrets.
+
+Priority order for each setting:
+  1. OS environment variable (set by Streamlit Cloud secrets injection, CI, etc.)
+  2. Streamlit st.secrets (when running inside a Streamlit app)
+  3. .env file in the project root (local development)
+  4. Hardcoded default
 
 All tunables live here so the rest of the codebase reads from one place.
 """
@@ -10,16 +16,33 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load .env from the project root (parent of src/)
+# Load .env from the project root (parent of src/) — no-op if file absent
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(PROJECT_ROOT / ".env", override=True)
+load_dotenv(PROJECT_ROOT / ".env", override=False)  # don't override real env vars
+
+
+def _st_secret(name: str) -> str | None:
+    """Read from Streamlit secrets if running inside a Streamlit app."""
+    try:
+        import streamlit as st
+        return st.secrets.get(name)
+    except Exception:
+        return None
 
 
 def _env(name: str, default: str | None = None, *, required: bool = False) -> str:
-    val = os.getenv(name, default)
+    # 1. Real environment variable (Streamlit Cloud injects secrets here)
+    val = os.getenv(name)
+    # 2. Streamlit st.secrets fallback (catches nested / un-injected secrets)
+    if not val:
+        val = _st_secret(name)
+    # 3. Explicit default
+    if not val:
+        val = default
     if required and not val:
         raise RuntimeError(
-            f"Missing required env var {name}. Copy .env.example to .env and fill it in."
+            f"Missing required env var {name}. "
+            "Set it in .env (local) or Streamlit Cloud secrets (deployed)."
         )
     return val or ""
 
