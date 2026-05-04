@@ -22,22 +22,53 @@ Agentic RAG over the FAA Accident/Incident (OMIn) maintenance dataset.
 - **Evaluation harness** with recall@k / precision@k / MRR over a small gold set,
   comparing semantic vs. lexical vs. hybrid retrieval.
 
-## Quickstart (your machine   gateway is reachable here)
+## Running the Streamlit UI
+
+The UI has five tabs: The Problem, Data Analysis, Architecture, Live Demo, and What's Next.
+The first four tabs and all visualisations work without an API key.
+The Live Demo tab (Q&A and Test Case Generator) requires a configured gateway key.
+
+**1. Install dependencies**
 
 ```bash
-python -m venv .venv && .venv\Scripts\activate         # PowerShell
-# or:  python -m venv .venv && source .venv/bin/activate   # bash
+python -m venv .venv
+.venv\Scripts\activate        # PowerShell
+# or: source .venv/bin/activate   # bash / zsh
 
 pip install -r requirements.txt
+```
 
+**2. Configure the API key**
+
+```bash
 cp .env.example .env
-# edit .env: paste your CMU_AI_GATEWAY_API_KEY (the rotated one).
-# Base URL is already set to https://ai-gateway.andrew.cmu.edu/v1
+```
 
-python scripts/build_index.py                          # ~30s on the LSA fallback
-python scripts/ask.py "Which fuel-system maintenance findings appear in single-engine piston accidents?"
-python scripts/run_eval.py                             # retrieval metrics
-python scripts/smoke_test.py                           # mocked agents (no API needed)
+Open `.env` and fill in:
+
+```
+CMU_AI_GATEWAY_API_KEY=your-key-here
+CMU_AI_GATEWAY_BASE_URL=https://ai-gateway.andrew.cmu.edu/v1
+```
+
+Any OpenAI-compatible endpoint works — standard OpenAI or Anthropic keys can be used by
+updating `base_url` and the model names accordingly.
+
+**3. Run the app**
+
+```bash
+streamlit run app.py
+```
+
+The pre-built index (`artifacts/`) is included in the repo — no index build step required.
+The app opens at `http://localhost:8501`.
+
+## CLI / evaluation quickstart
+
+```bash
+python scripts/ask.py "Which fuel-system findings appear in single-engine piston accidents?"
+python scripts/run_eval.py      # retrieval metrics (recall@k, precision@k, MRR)
+python scripts/smoke_test.py    # mocked end-to-end, no API key needed
 ```
 
 ## Architecture (one-line per layer)
