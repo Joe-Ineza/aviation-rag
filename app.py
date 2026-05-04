@@ -906,15 +906,14 @@ with tab4:
             if demo_mode == "Q&A Assistant"
             else "e.g. Generate test cases for fuel system pre-flight inspection"
         )
-        query = st.text_area(
-            "Topic or question (must relate to aviation incidents or maintenance):",
-            value=chosen_sample,
-            height=80,
-            placeholder=placeholder,
-            key=f"query_{demo_mode}",
-        )
-
-        run_btn = st.button("Run", type="primary", disabled=not bool(query.strip()))
+        with st.form(key=f"query_form_{demo_mode}"):
+            query = st.text_area(
+                "Topic or question (must relate to aviation incidents or maintenance):",
+                value=chosen_sample,
+                height=80,
+                placeholder=placeholder,
+            )
+            run_btn = st.form_submit_button("Run", type="primary")
 
         if run_btn and query.strip():
             st.markdown("---")
