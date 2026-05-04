@@ -70,10 +70,8 @@ class Settings:
     # Gateway / LLM
     api_key: str = _env("CMU_AI_GATEWAY_API_KEY", "")
     base_url: str = _env("CMU_AI_GATEWAY_BASE_URL", "")
-    gen_model: str = _env("GEN_MODEL", "us.anthropic.claude-sonnet-4-6")
-    judge_model: str = _env(
-        "JUDGE_MODEL", "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-    )
+    gen_model: str = _env("GEN_MODEL", "gemini-pro-latest")
+    judge_model: str = _env("JUDGE_MODEL", "gemini-flash-latest")
 
     # Embeddings
     embed_model: str = _env("EMBED_MODEL", "BAAI/bge-small-en-v1.5")

@@ -1241,10 +1241,3 @@ with tab5:
         "can be dropped in independently — the schema, retriever, agent interfaces, "
         "and evaluation harness are all decoupled."
     )
-
-# ---------------------------------------------------------------------------
-_pad = None
-_pad = None
-_pad = None
-_pad = None
-_pad = None

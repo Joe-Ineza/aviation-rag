@@ -173,8 +173,9 @@ class LLMClient:
         if json_mode and _supports_json_mode():
             kwargs["response_format"] = {"type": "json_object"}
 
-        last_exc: Exception | None = None
-        for attempt in range(SETTINGS.llm_max_retries):
+        last_exc: Exception = RuntimeError("LLM call failed with no attempts made")
+        max_retries = max(1, SETTINGS.llm_max_retries)  # always try at least once
+        for attempt in range(max_retries):
             try:
                 resp = self.client.chat.completions.create(**kwargs)
                 return resp.choices[0].message.content or ""
@@ -183,17 +184,17 @@ class LLMClient:
                     delay = SETTINGS.llm_retry_base_delay * (2 ** attempt)
                     log.warning(
                         "LLM %s error (attempt %d/%d), retrying in %.1fs — %s",
-                        exc.status_code, attempt + 1, SETTINGS.llm_max_retries,
+                        exc.status_code, attempt + 1, max_retries,
                         delay, exc.message,
                     )
                     time.sleep(delay)
                     last_exc = exc
                 else:
                     raise
-            except Exception as exc:
+            except Exception:
                 raise
 
-        raise last_exc  # type: ignore[misc]
+        raise last_exc
 
     def chat_json(
         self,
